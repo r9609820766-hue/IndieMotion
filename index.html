@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IndieMotion - Stream Independent Cinema</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #141414;
+            color: white;
+        }
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        /* Hero Carousel */
+        .hero-carousel {
+            margin-top: -76px;
+            position: relative;
+        }
+        .carousel-item {
+            height: 85vh;
+            min-height: 500px;
+            background-size: cover;
+            background-position: center 30%;
+            position: relative;
+        }
+        .carousel-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(0deg, #141414 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);
+        }
+        .carousel-caption {
+            position: absolute;
+            bottom: 25%;
+            left: 10%;
+            right: auto;
+            text-align: left;
+            z-index: 2;
+            width: 60%;
+        }
+        .carousel-caption h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .carousel-caption p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+        .carousel-control-prev, .carousel-control-next {
+            width: 5%;
+            opacity: 0.7;
+        }
+        .carousel-indicators button {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin: 0 5px;
+        }
+        @media (max-width: 768px) {
+            .carousel-item { height: 60vh; }
+            .carousel-caption { bottom: 15%; width: 80%; }
+            .carousel-caption h1 { font-size: 1.8rem; }
+            .carousel-caption p { font-size: 0.9rem; }
+        }
+        /* Section Titles */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-left: 4px solid #e50914;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        /* Row Sliders (same as before) */
+        .row-slider {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 0.5rem 0 1.5rem;
+            scrollbar-width: thin;
+        }
+        .row-slider::-webkit-scrollbar { height: 6px; }
+        .row-slider::-webkit-scrollbar-track { background: #2c2c2c; border-radius: 10px; }
+        .row-slider::-webkit-scrollbar-thumb { background: #e50914; border-radius: 10px; }
+        .card-slider-item {
+            flex: 0 0 auto;
+            width: 180px;
+            transition: transform 0.3s ease;
+        }
+        @media (min-width: 768px) { .card-slider-item { width: 200px; } }
+        @media (min-width: 1200px) { .card-slider-item { width: 220px; } }
+        .card-slider-item:hover { transform: scale(1.05); z-index: 10; }
+        .thumbnail-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #1a1a1a;
+        }
+        .thumbnail-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .card-slider-item:hover .thumbnail-container img { transform: scale(1.02); }
+        .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 8px;
+        }
+        .card-slider-item:hover .card-overlay { opacity: 1; }
+        .card-overlay .btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            color: black;
+            border: none;
+        }
+        .card-overlay .btn:hover { background: #e50914; color: white; }
+        .card-title {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .slider-container { position: relative; }
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 80px;
+            border-radius: 0;
+            z-index: 5;
+            transition: 0.2s;
+        }
+        .slider-btn:hover { background: rgba(0,0,0,0.9); width: 48px; }
+        .slider-left { left: 0; border-radius: 0 8px 8px 0; }
+        .slider-right { right: 0; border-radius: 8px 0 0 8px; }
+        @media (max-width: 576px) {
+            .card-slider-item { width: 140px; }
+            .slider-btn { width: 30px; height: 60px; }
+            .card-title { font-size: 0.7rem; }
+        }
+        .progress { background-color: #3a3a3a; height: 4px; }
+        .progress-bar { background-color: #e50914; }
+        .footer { border-top: 1px solid #2c2c2c; background: #0a0a0a; }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
+        <div class="container-fluid px-4 px-lg-5">
+            <a class="navbar-brand fw-bold fs-3" href="index.html"><span style="color: white;">Indie</span><span style="color: #e50914;">Motion</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="movies.html">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="series.html">Series</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3" id="authNav"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Carousel (auto-slide 5 seconds) -->
+    <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
+        <div class="carousel-indicators" id="carouselIndicators"></div>
+        <div class="carousel-inner" id="carouselInner">
+            <div class="carousel-item active">
+                <div class="carousel-caption">
+                    <h1>IndieMotion</h1>
+                    <p>Bold stories. Independent vision. Unlimited streaming.</p>
+                    <button class="btn btn-light btn-lg" id="tempPlayBtn"><i class="fas fa-play me-2"></i>Play Now</button>
+                    <button class="btn btn-outline-light btn-lg ms-2" id="tempInfoBtn"><i class="fas fa-info-circle me-2"></i>More Info</button>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+    </div>
+
+    <main class="container-fluid px-4 px-lg-5 mt-4">
+        <!-- Continue Watching Row -->
+        <div id="continueWatchingSection" class="mb-5 d-none">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="section-title"><i class="fas fa-clock me-2 text-danger"></i>Continue Watching</h2>
+            </div>
+            <div class="slider-container position-relative">
+                <button class="slider-btn slider-left" data-slider="continueSlider"><i class="fas fa-chevron-left"></i></button>
+                <div class="row-slider" id="continueSlider"></div>
+                <button class="slider-btn slider-right" data-slider="continueSlider"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Trending Now Row -->
+        <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="section-title"><i class="fas fa-fire me-2 text-danger"></i>Trending Now</h2>
+                <a href="movies.html" class="text-decoration-none text-white-50">View All <i class="fas fa-arrow-right ms-1"></i></a>
+            </div>
+            <div class="slider-container position-relative">
+                <button class="slider-btn slider-left" data-slider="trendingSlider"><i class="fas fa-chevron-left"></i></button>
+                <div class="row-slider" id="trendingSlider"></div>
+                <button class="slider-btn slider-right" data-slider="trendingSlider"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Recommended For You -->
+        <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="section-title"><i class="fas fa-thumbs-up me-2 text-danger"></i>Recommended For You</h2>
+            </div>
+            <div class="slider-container position-relative">
+                <button class="slider-btn slider-left" data-slider="recommendedSlider"><i class="fas fa-chevron-left"></i></button>
+                <div class="row-slider" id="recommendedSlider"></div>
+                <button class="slider-btn slider-right" data-slider="recommendedSlider"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer mt-5 py-4 text-center text-white-50 small">
+        <p>&copy; 2025 IndieMotion. All rights reserved. Independent films, series, and original content.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase client
+        const SUPABASE_URL = 'https://lxqxdtsgwgdogmncgaqj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4cXhkdHNnd2dkb2dtbmNnYXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODkyMTgsImV4cCI6MjA5Njc2NTIxOH0.pkJOOXG9NkVqsRloO3lm1dRWXcrQESBlEiXW8g_Oh-8';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentUser = null;
+        let userRole = null;
+        let carouselItems = []; // store slides data
+
+        // Auth
+        async function initAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', currentUser.id).single();
+                userRole = profile?.role || 'user';
+            }
+            updateNavbar();
+        }
+
+        function updateNavbar() {
+            const authNav = document.getElementById('authNav');
+            if (!authNav) return;
+            if (currentUser) {
+                let adminLink = '';
+                if (userRole === 'admin') {
+                    adminLink = '<li><a class="dropdown-item" href="admin-dashboard.html"><i class="fas fa-cog me-2"></i>Admin Panel</a></li><li><hr class="dropdown-divider"></li>';
+                }
+                authNav.innerHTML = `
+                    <div class="dropdown">
+                        <button class="btn btn-link text-white dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle fs-4"></i>
+                            <span>${currentUser.email.split('@')[0]}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            ${adminLink}
+                            <li><a class="dropdown-item" href="#" id="navbarLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                `;
+                const logoutBtn = document.getElementById('navbarLogoutBtn');
+                if (logoutBtn) logoutBtn.addEventListener('click', async () => {
+                    await supabaseClient.auth.signOut();
+                    window.location.reload();
+                });
+            } else {
+                authNav.innerHTML = `
+                    <a href="auth.html" class="btn btn-outline-light btn-sm">Login</a>
+                    <a href="auth.html?register=true" class="btn btn-danger btn-sm">Sign Up</a>
+                `;
+            }
+        }
+
+        // Load hero carousel slides (mix of featured movies and series)
+        async function loadHeroCarousel() {
+            // Fetch featured movies (limit 5)
+            const { data: movies } = await supabaseClient
+                .from('movies')
+                .select('id, title, description, poster_url, video_url')
+                .eq('featured', true)
+                .limit(5);
+            // Fetch featured series
+            const { data: series } = await supabaseClient
+                .from('series')
+                .select('id, title, description, poster_url')
+                .eq('featured', true)
+                .limit(5);
+            
+            const slides = [];
+            if (movies && movies.length) {
+                movies.forEach(m => slides.push({ ...m, type: 'movie' }));
+            }
+            if (series && series.length) {
+                series.forEach(s => slides.push({ ...s, type: 'series' }));
+            }
+            // If no featured content, fallback to any movies (top 5)
+            if (slides.length === 0) {
+                const { data: anyMovies } = await supabaseClient
+                    .from('movies')
+                    .select('id, title, description, poster_url, video_url')
+                    .limit(5);
+                if (anyMovies) anyMovies.forEach(m => slides.push({ ...m, type: 'movie' }));
+            }
+            carouselItems = slides;
+            if (slides.length === 0) return;
+            
+            const carouselInner = document.getElementById('carouselInner');
+            const indicators = document.getElementById('carouselIndicators');
+            carouselInner.innerHTML = '';
+            indicators.innerHTML = '';
+            
+            slides.forEach((slide, index) => {
+                const isActive = index === 0 ? 'active' : '';
+                const bgImage = slide.poster_url ? slide.poster_url.replace('300/450', '1200/500') : 'https://picsum.photos/id/104/1200/500';
+                const description = slide.description ? slide.description.substring(0, 150) : 'Watch now on IndieMotion.';
+                
+                const slideDiv = document.createElement('div');
+                slideDiv.className = `carousel-item ${isActive}`;
+                slideDiv.style.backgroundImage = `linear-gradient(0deg, #141414 0%, rgba(0,0,0,0.4) 100%), url(${bgImage})`;
+                slideDiv.innerHTML = `
+                    <div class="carousel-caption">
+                        <h1>${slide.title}</h1>
+                        <p>${description}</p>
+                        <button class="btn btn-light btn-lg hero-play-btn" data-type="${slide.type}" data-id="${slide.id}"><i class="fas fa-play me-2"></i>Play Now</button>
+                        <button class="btn btn-outline-light btn-lg ms-2 hero-info-btn" data-type="${slide.type}" data-id="${slide.id}"><i class="fas fa-info-circle me-2"></i>More Info</button>
+                    </div>
+                `;
+                carouselInner.appendChild(slideDiv);
+                
+                // Indicator
+                const indicator = document.createElement('button');
+                indicator.setAttribute('type', 'button');
+                indicator.setAttribute('data-bs-target', '#heroCarousel');
+                indicator.setAttribute('data-bs-slide-to', index);
+                if (index === 0) indicator.className = 'active';
+                indicator.setAttribute('aria-current', index === 0 ? 'true' : 'false');
+                indicator.setAttribute('aria-label', `Slide ${index + 1}`);
+                indicators.appendChild(indicator);
+            });
+            
+            // Attach event listeners to buttons
+            document.querySelectorAll('.hero-play-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const type = btn.getAttribute('data-type');
+                    const id = btn.getAttribute('data-id');
+                    if (type === 'movie') window.location.href = `watch.html?type=movie&id=${id}`;
+                    else window.location.href = `series-details.html?id=${id}`;
+                });
+            });
+            document.querySelectorAll('.hero-info-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const type = btn.getAttribute('data-type');
+                    const id = btn.getAttribute('data-id');
+                    if (type === 'movie') window.location.href = `movie-details.html?id=${id}`;
+                    else window.location.href = `series-details.html?id=${id}`;
+                });
+            });
+        }
+
+        // Slider render helper (16:9 cards)
+        function renderSlider(containerId, items, showProgress = false) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            if (!items.length) {
+                container.innerHTML = '<div class="text-white-50">No content available</div>';
+                return;
+            }
+            container.innerHTML = items.map(item => {
+                const title = item.title || 'Untitled';
+                const poster = item.poster_url || 'https://picsum.photos/id/0/300/169';
+                let detailLink, watchLink;
+                if (item.content_type === 'movie' || (!item.content_type && !item.season_id)) {
+                    detailLink = `movie-details.html?id=${item.id}`;
+                    watchLink = `watch.html?type=movie&id=${item.id}`;
+                } else if (item.content_type === 'series') {
+                    detailLink = `series-details.html?id=${item.id}`;
+                    watchLink = `series-details.html?id=${item.id}`;
+                } else { // episode
+                    watchLink = `watch.html?type=episode&id=${item.id}`;
+                    detailLink = '#';
+                }
+                let progressHtml = '';
+                if (showProgress && item.progress && item.duration) {
+                    const percent = (item.progress / (item.duration || 3600)) * 100;
+                    progressHtml = `<div class="progress w-100 mt-2"><div class="progress-bar" style="width: ${Math.min(percent,100)}%"></div></div>`;
+                }
+                return `
+                    <div class="card-slider-item">
+                        <div class="card h-100 bg-transparent border-0">
+                            <div class="position-relative">
+                                <div class="thumbnail-container">
+                                    <img src="${poster}" alt="${title}" loading="lazy">
+                                </div>
+                                <div class="card-overlay">
+                                    <button class="btn btn-play rounded-circle" data-watch-url="${watchLink}"><i class="fas fa-play"></i></button>
+                                    <button class="btn btn-info-circle rounded-circle" data-detail-url="${detailLink}"><i class="fas fa-info"></i></button>
+                                </div>
+                            </div>
+                            <div class="card-body p-2">
+                                <h6 class="card-title text-white text-truncate">${title}</h6>
+                                ${progressHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            // Attach events
+            container.querySelectorAll('.btn-play').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = btn.getAttribute('data-watch-url');
+                    if (url && url !== '#') window.location.href = url;
+                });
+            });
+            container.querySelectorAll('.btn-info-circle').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = btn.getAttribute('data-detail-url');
+                    if (url && url !== '#') window.location.href = url;
+                });
+            });
+        }
+
+        // Load trending (movies + series)
+        async function loadTrending() {
+            const { data: movies } = await supabaseClient.from('movies').select('id, title, poster_url, views').order('views', { ascending: false }).limit(12);
+            const { data: series } = await supabaseClient.from('series').select('id, title, poster_url').limit(6);
+            const combined = [...(movies || []), ...(series || []).map(s => ({ ...s, content_type: 'series' }))];
+            renderSlider('trendingSlider', combined);
+        }
+
+        // Load continue watching (logged in)
+        async function loadContinueWatching() {
+            if (!currentUser) {
+                document.getElementById('continueWatchingSection')?.classList.add('d-none');
+                return;
+            }
+            const { data: history } = await supabaseClient
+                .from('watch_history')
+                .select('content_type, content_id, progress_seconds')
+                .eq('user_id', currentUser.id)
+                .order('watched_at', { ascending: false })
+                .limit(20);
+            if (!history || history.length === 0) {
+                document.getElementById('continueWatchingSection')?.classList.add('d-none');
+                return;
+            }
+            document.getElementById('continueWatchingSection')?.classList.remove('d-none');
+            const items = [];
+            for (const record of history) {
+                if (record.content_type === 'movie') {
+                    const { data: movie } = await supabaseClient.from('movies').select('id, title, poster_url, duration').eq('id', record.content_id).single();
+                    if (movie) items.push({ ...movie, content_type: 'movie', progress: record.progress_seconds });
+                } else if (record.content_type === 'episode') {
+                    const { data: ep } = await supabaseClient.from('episodes').select('id, title, thumbnail, duration').eq('id', record.content_id).single();
+                    if (ep) items.push({ ...ep, content_type: 'episode', progress: record.progress_seconds });
+                }
+            }
+            renderSlider('continueSlider', items, true);
+        }
+
+        // Load recommended (random)
+        async function loadRecommended() {
+            const { data: movies } = await supabaseClient.from('movies').select('id, title, poster_url').limit(12);
+            const { data: series } = await supabaseClient.from('series').select('id, title, poster_url').limit(6);
+            let combined = [...(movies || []), ...(series || []).map(s => ({ ...s, content_type: 'series' }))];
+            for (let i = combined.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [combined[i], combined[j]] = [combined[j], combined[i]];
+            }
+            renderSlider('recommendedSlider', combined.slice(0, 15));
+        }
+
+        // Slider scroll buttons
+        function initSliders() {
+            document.querySelectorAll('.slider-container').forEach(container => {
+                const slider = container.querySelector('.row-slider');
+                const leftBtn = container.querySelector('.slider-left');
+                const rightBtn = container.querySelector('.slider-right');
+                if (slider && leftBtn && rightBtn) {
+                    leftBtn.addEventListener('click', () => slider.scrollBy({ left: -300, behavior: 'smooth' }));
+                    rightBtn.addEventListener('click', () => slider.scrollBy({ left: 300, behavior: 'smooth' }));
+                }
+            });
+        }
+
+        // Initialize all
+        (async () => {
+            await initAuth();
+            await loadHeroCarousel();
+            await loadTrending();
+            await loadContinueWatching();
+            await loadRecommended();
+            initSliders();
+        })();
+    </script>
+</body>
+</html>

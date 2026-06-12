@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IndieMotion - Series Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            padding-top: 76px;
+            background: #0a0a0a;
+        }
+        .series-backdrop {
+            position: relative;
+            background-size: cover;
+            background-position: center 30%;
+            padding: 2rem 0 3rem;
+            margin-top: -76px;
+            z-index: 0;
+        }
+        .series-backdrop::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(0deg, #0a0a0a 0%, rgba(0,0,0,0.6) 100%);
+            z-index: 1;
+        }
+        .series-backdrop .container {
+            position: relative;
+            z-index: 2;
+        }
+        .poster-container img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .rating-star {
+            cursor: pointer;
+            font-size: 1.8rem;
+            margin-right: 5px;
+            transition: transform 0.1s;
+        }
+        .rating-star:hover {
+            transform: scale(1.1);
+        }
+        .season-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border-left: 3px solid #e50914;
+        }
+        .episode-item {
+            background: #222;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            transition: background 0.2s;
+        }
+        .episode-item:hover {
+            background: #2a2a2a;
+        }
+        .btn-watch-episode {
+            background: #e50914;
+            border: none;
+            padding: 0.25rem 1rem;
+            font-size: 0.8rem;
+        }
+        .btn-watch-episode:hover {
+            background: #f6121d;
+        }
+        .similar-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .similar-card:hover {
+            transform: scale(1.05);
+        }
+        .similar-card img {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+        }
+        @media (max-width: 768px) {
+            body { padding-top: 60px; }
+            .rating-star { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
+        <div class="container-fluid px-4 px-lg-5">
+            <a class="navbar-brand fw-bold fs-3" href="index.html"><span style="color: white;">Indie</span><span style="color: #e50914;">Motion</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="movies.html">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#">Series</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3" id="authNav"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Series Backdrop & Info -->
+    <div class="series-backdrop" id="seriesBackdrop" style="background-image: url('https://picsum.photos/id/0/1200/500');">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="poster-container">
+                        <img id="seriesPoster" src="https://picsum.photos/id/0/300/450" alt="Poster">
+                    </div>
+                </div>
+                <div class="col-md-8 col-lg-9">
+                    <h1 id="seriesTitle" class="display-4 fw-bold text-white">Loading...</h1>
+                    <div class="d-flex flex-wrap gap-3 my-3 text-white-50">
+                        <span id="seriesYear"></span>
+                        <span><i class="fas fa-star text-warning"></i> <span id="seriesRating"></span> / 5</span>
+                        <span id="seriesGenre" class="badge bg-danger"></span>
+                    </div>
+                    <p id="seriesDescription" class="lead text-white-50"></p>
+                    <div class="d-flex gap-3 mt-4">
+                        <button id="watchlistBtn" class="btn btn-outline-secondary btn-lg px-4"><i class="fas fa-plus me-2"></i>Watchlist</button>
+                    </div>
+                    <!-- Rating Section -->
+                    <div class="mt-5 pt-3 border-top border-secondary">
+                        <h5 class="text-white">Rate this series</h5>
+                        <div id="ratingStars" class="d-flex">
+                            <i class="far fa-star rating-star" data-rating="1"></i>
+                            <i class="far fa-star rating-star" data-rating="2"></i>
+                            <i class="far fa-star rating-star" data-rating="3"></i>
+                            <i class="far fa-star rating-star" data-rating="4"></i>
+                            <i class="far fa-star rating-star" data-rating="5"></i>
+                        </div>
+                        <p id="ratingMessage" class="small text-white-50 mt-2"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seasons & Episodes -->
+    <div class="container px-4 px-lg-5 mt-4">
+        <h3 class="section-title mb-4">Seasons & Episodes</h3>
+        <div id="seasonsContainer"></div>
+    </div>
+
+    <!-- Similar Series -->
+    <div class="container px-4 px-lg-5 mt-5">
+        <h3 class="section-title mb-4">More Like This</h3>
+        <div class="row g-4" id="similarSeriesGrid">
+            <div class="col-12 text-center"><div class="spinner-border text-danger"></div></div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-4 text-center text-white-50 small">
+        <p>&copy; 2025 IndieMotion. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase client
+        const SUPABASE_URL = 'https://lxqxdtsgwgdogmncgaqj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4cXhkdHNnd2dkb2dtbmNnYXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODkyMTgsImV4cCI6MjA5Njc2NTIxOH0.pkJOOXG9NkVqsRloO3lm1dRWXcrQESBlEiXW8g_Oh-8';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let seriesId = null;
+        let currentSeries = null;
+        let currentUser = null;
+        let userRating = 0;
+        let isInWatchlist = false;
+        
+        // Get series ID from URL
+        function getSeriesIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+        
+        // Auth & profile
+        async function getCurrentUser() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            currentUser = session?.user || null;
+            updateNavbar();
+            if (currentUser && seriesId) {
+                await checkWatchlistStatus();
+                await loadUserRating();
+            }
+        }
+        
+        function updateNavbar() {
+            const authNav = document.getElementById('authNav');
+            if (!authNav) return;
+            if (currentUser) {
+                authNav.innerHTML = `
+                    <div class="dropdown">
+                        <button class="btn btn-link text-white dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle fs-4"></i>
+                            <span>${currentUser.email?.split('@')[0]}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                `;
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) logoutBtn.addEventListener('click', async () => {
+                    await supabaseClient.auth.signOut();
+                    window.location.reload();
+                });
+            } else {
+                authNav.innerHTML = `
+                    <a href="auth.html" class="btn btn-outline-light btn-sm">Login</a>
+                    <a href="auth.html?register=true" class="btn btn-danger btn-sm">Sign Up</a>
+                `;
+            }
+        }
+        
+        // Load series details
+        async function loadSeriesDetails() {
+            if (!seriesId) return;
+            const { data, error } = await supabaseClient
+                .from('series')
+                .select('*, genres(name)')
+                .eq('id', seriesId)
+                .single();
+            if (error) {
+                console.error(error);
+                document.getElementById('seriesTitle').innerText = 'Series not found';
+                return;
+            }
+            currentSeries = data;
+            document.getElementById('seriesTitle').innerText = data.title;
+            document.getElementById('seriesDescription').innerText = data.description || 'No description available.';
+            document.getElementById('seriesYear').innerHTML = `<i class="fas fa-calendar-alt me-1"></i> ${data.release_year || 'N/A'}`;
+            document.getElementById('seriesRating').innerText = (data.rating || 0).toFixed(1);
+            document.getElementById('seriesGenre').innerText = data.genres?.name || 'Uncategorized';
+            const posterImg = document.getElementById('seriesPoster');
+            if (data.poster_url) posterImg.src = data.poster_url;
+            document.getElementById('seriesBackdrop').style.backgroundImage = `linear-gradient(0deg, #0a0a0a 0%, rgba(0,0,0,0.6) 100%), url(${data.poster_url?.replace('300/450', '1200/500') || 'https://picsum.photos/id/0/1200/500'})`;
+        }
+        
+        // Load seasons and episodes
+        async function loadSeasonsAndEpisodes() {
+            if (!seriesId) return;
+            const { data: seasons } = await supabaseClient
+                .from('seasons')
+                .select('*')
+                .eq('series_id', seriesId)
+                .order('season_number', { ascending: true });
+            if (!seasons || seasons.length === 0) {
+                document.getElementById('seasonsContainer').innerHTML = '<p class="text-white-50">No seasons available.</p>';
+                return;
+            }
+            let html = '';
+            for (const season of seasons) {
+                const { data: episodes } = await supabaseClient
+                    .from('episodes')
+                    .select('*')
+                    .eq('season_id', season.id)
+                    .order('episode_number', { ascending: true });
+                let episodesHtml = '';
+                if (episodes && episodes.length) {
+                    episodesHtml = episodes.map(ep => `
+                        <div class="episode-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="text-white">Episode ${ep.episode_number}: ${ep.title}</strong>
+                                <p class="small text-white-50 mb-0">${ep.description || ''} ${ep.duration ? `(${Math.floor(ep.duration/60)} min)` : ''}</p>
+                            </div>
+                            <button class="btn btn-watch-episode btn-sm text-white" data-episode-id="${ep.id}"><i class="fas fa-play me-1"></i>Watch</button>
+                        </div>
+                    `).join('');
+                } else {
+                    episodesHtml = '<div class="text-white-50 small p-2">No episodes yet.</div>';
+                }
+                html += `
+                    <div class="season-card">
+                        <div class="d-flex justify-content-between align-items-center p-3">
+                            <h5 class="mb-0 text-white">Season ${season.season_number}: ${season.title || ''}</h5>
+                        </div>
+                        <div class="px-3 pb-3">
+                            ${episodesHtml}
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('seasonsContainer').innerHTML = html;
+            // Attach episode watch events
+            document.querySelectorAll('[data-episode-id]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const episodeId = btn.getAttribute('data-episode-id');
+                    window.location.href = `watch.html?type=episode&id=${episodeId}`;
+                });
+            });
+        }
+        
+        // Watchlist functions
+        async function checkWatchlistStatus() {
+            if (!currentUser || !seriesId) return;
+            const { data, error } = await supabaseClient
+                .from('watchlist')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .eq('content_type', 'series')
+                .eq('content_id', seriesId)
+                .maybeSingle();
+            if (!error && data) {
+                isInWatchlist = true;
+                document.getElementById('watchlistBtn').innerHTML = '<i class="fas fa-check me-2"></i>In Watchlist';
+            } else {
+                isInWatchlist = false;
+                document.getElementById('watchlistBtn').innerHTML = '<i class="fas fa-plus me-2"></i>Watchlist';
+            }
+        }
+        
+        async function toggleWatchlist() {
+            if (!currentUser) {
+                alert('Please login to manage watchlist');
+                window.location.href = 'auth.html';
+                return;
+            }
+            if (isInWatchlist) {
+                await supabaseClient
+                    .from('watchlist')
+                    .delete()
+                    .eq('user_id', currentUser.id)
+                    .eq('content_type', 'series')
+                    .eq('content_id', seriesId);
+                isInWatchlist = false;
+                document.getElementById('watchlistBtn').innerHTML = '<i class="fas fa-plus me-2"></i>Watchlist';
+            } else {
+                await supabaseClient
+                    .from('watchlist')
+                    .insert({ user_id: currentUser.id, content_type: 'series', content_id: seriesId });
+                isInWatchlist = true;
+                document.getElementById('watchlistBtn').innerHTML = '<i class="fas fa-check me-2"></i>In Watchlist';
+            }
+        }
+        
+        // Rating stars
+        function setupRatingStars() {
+            const stars = document.querySelectorAll('#ratingStars i');
+            stars.forEach(star => {
+                star.addEventListener('mouseenter', function() {
+                    highlightStars(parseInt(this.dataset.rating));
+                });
+                star.addEventListener('mouseleave', () => highlightStars(userRating));
+                star.addEventListener('click', async function() {
+                    const rating = parseInt(this.dataset.rating);
+                    if (!currentUser) {
+                        alert('Please login to rate');
+                        window.location.href = 'auth.html';
+                        return;
+                    }
+                    const { error } = await supabaseClient
+                        .from('ratings')
+                        .upsert({ user_id: currentUser.id, content_type: 'series', content_id: seriesId, rating }, 
+                                 { onConflict: 'user_id, content_type, content_id' });
+                    if (!error) {
+                        userRating = rating;
+                        highlightStars(userRating);
+                        document.getElementById('ratingMessage').innerText = 'Thank you for rating!';
+                        loadSeriesDetails(); // refresh rating
+                    } else {
+                        document.getElementById('ratingMessage').innerText = 'Error saving rating';
+                    }
+                });
+            });
+        }
+        
+        function highlightStars(rating) {
+            const stars = document.querySelectorAll('#ratingStars i');
+            stars.forEach((star, idx) => {
+                if (idx < rating) star.className = 'fas fa-star rating-star text-warning';
+                else star.className = 'far fa-star rating-star text-white-50';
+            });
+        }
+        
+        async function loadUserRating() {
+            if (!currentUser || !seriesId) return;
+            const { data } = await supabaseClient
+                .from('ratings')
+                .select('rating')
+                .eq('user_id', currentUser.id)
+                .eq('content_type', 'series')
+                .eq('content_id', seriesId)
+                .maybeSingle();
+            if (data) {
+                userRating = data.rating;
+                highlightStars(userRating);
+            }
+        }
+        
+        // Similar series
+        async function loadSimilarSeries() {
+            if (!currentSeries) return;
+            const { data } = await supabaseClient
+                .from('series')
+                .select('id, title, poster_url, release_year, rating')
+                .eq('genre_id', currentSeries.genre_id)
+                .neq('id', seriesId)
+                .limit(6);
+            if (!data || data.length === 0) {
+                document.getElementById('similarSeriesGrid').innerHTML = '<div class="col-12 text-white-50 text-center">No similar series found.</div>';
+                return;
+            }
+            const grid = document.getElementById('similarSeriesGrid');
+            grid.innerHTML = data.map(series => `
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="similar-card" onclick="window.location.href='series-details.html?id=${series.id}'">
+                        <img src="${series.poster_url || 'https://picsum.photos/id/0/300/450'}" alt="${series.title}">
+                        <div class="mt-2">
+                            <h6 class="text-white text-truncate">${series.title}</h6>
+                            <div class="small text-white-50">${series.release_year || 'N/A'} • <i class="fas fa-star text-warning"></i> ${series.rating?.toFixed(1) || '0'}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Initialize
+        seriesId = getSeriesIdFromUrl();
+        if (!seriesId) {
+            document.querySelector('.series-backdrop').innerHTML = '<div class="alert alert-danger text-center">Invalid series ID</div>';
+        } else {
+            (async () => {
+                await getCurrentUser();
+                await loadSeriesDetails();
+                await loadSeasonsAndEpisodes();
+                await loadSimilarSeries();
+                setupRatingStars();
+                if (currentUser) await loadUserRating();
+                document.getElementById('watchlistBtn').addEventListener('click', toggleWatchlist);
+            })();
+        }
+    </script>
+</body>
+</html>

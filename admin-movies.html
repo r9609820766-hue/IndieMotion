@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Movies - IndieMotion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: white; }
+        .navbar-admin { background: #0f0f0f; border-bottom: 1px solid #222; padding: 0.75rem 1.5rem; }
+        .navbar-brand { font-size: 1.8rem; font-weight: 800; }
+        .navbar-brand .indie { color: white; }
+        .navbar-brand .motion { color: #e50914; }
+        .offcanvas { background: linear-gradient(180deg, #0f0f0f 0%, #050505 100%); width: 280px; border-right: 1px solid #222; }
+        .nav-admin .nav-link { color: #b3b3b3; padding: 0.75rem 1rem; border-radius: 12px; transition: 0.2s; font-weight: 500; }
+        .nav-admin .nav-link i { width: 28px; margin-right: 8px; }
+        .nav-admin .nav-link:hover, .nav-admin .nav-link.active { background: #e50914; color: white; }
+        .admin-content { padding: 2rem; margin-top: 70px; }
+        .btn-danger { background-color: #e50914; border: none; }
+        .btn-danger:hover { background-color: #f6121d; }
+        .movie-table img { width: 50px; border-radius: 4px; }
+        .modal-content { background: #141414; border: 1px solid #333; }
+        .form-control, .form-select { background-color: #2c2c2c; border: 1px solid #404040; color: white; }
+        .form-control:focus, .form-select:focus { border-color: #e50914; box-shadow: 0 0 0 0.2rem rgba(229,9,20,0.25); }
+        .upload-area { border: 2px dashed #404040; border-radius: 8px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .upload-area:hover { border-color: #e50914; background: rgba(229,9,20,0.1); }
+        .progress-upload { height: 5px; margin-top: 8px; display: none; }
+        @media (max-width: 768px) { .admin-content { padding: 1rem; } }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-admin fixed-top">
+        <div class="container-fluid">
+            <button class="btn btn-link text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar">
+                <i class="fas fa-bars fs-4"></i>
+            </button>
+            <a class="navbar-brand mx-auto" href="#"><span class="indie">Indie</span><span class="motion">Motion</span></a>
+            <div class="dropdown">
+                <button class="btn btn-link text-white dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle fs-4"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                    <li><span id="adminEmailDisplay" class="dropdown-item-text small text-white-50"></span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" id="adminLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="adminSidebar">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title text-white">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="nav nav-admin flex-column">
+                <li class="nav-item"><a class="nav-link" href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link active" href="admin-movies.html"><i class="fas fa-film"></i> Movies</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-series.html"><i class="fas fa-tv"></i> Series</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-categories.html"><i class="fas fa-tags"></i> Categories</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-genres.html"><i class="fas fa-music"></i> Genres</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-users.html"><i class="fas fa-users"></i> Users</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-reports.html"><i class="fas fa-chart-line"></i> Reports</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+            <hr class="bg-secondary my-4">
+            <button id="adminLogoutBtnSidebar" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Manage Movies</h2>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#movieModal" onclick="openAddModal()">
+                <i class="fas fa-plus me-2"></i>Add Movie
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr><th>Poster</th><th>Title</th><th>Genre</th><th>Year</th><th>Rating</th><th>Views</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="moviesTableBody">
+                    <tr><td colspan="7" class="text-center">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Movie Modal -->
+    <div class="modal fade" id="movieModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white" id="movieModalTitle">Add Movie</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="movieForm">
+                        <input type="hidden" id="movieId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Title*</label>
+                                <input type="text" id="title" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Release Year</label>
+                                <input type="number" id="release_year" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea id="description" rows="3" class="form-control"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Genre</label>
+                                <select id="genre_id" class="form-select"></select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Category</label>
+                                <select id="category_id" class="form-select"></select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Duration (min)</label>
+                                <input type="number" id="duration" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Initial Rating</label>
+                                <input type="number" step="0.1" id="rating" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Featured</label>
+                                <select id="featured" class="form-select">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Trailer URL (YouTube embed)</label>
+                            <input type="text" id="trailer_url" class="form-control" placeholder="https://www.youtube.com/embed/...">
+                        </div>
+                        
+                        <!-- Poster Upload -->
+                        <div class="mb-3">
+                            <label class="form-label">Poster Image</label>
+                            <div class="upload-area" id="posterUploadArea">
+                                <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                                <p>Click to upload poster (JPG, PNG)</p>
+                                <input type="file" id="posterFile" accept="image/*" style="display:none">
+                                <div id="posterProgress" class="progress-upload"><div class="progress-bar bg-danger" style="width:0%"></div></div>
+                            </div>
+                            <input type="text" id="poster_url" class="form-control mt-2" placeholder="Or paste image URL">
+                        </div>
+                        
+                        <!-- Video Upload -->
+                        <div class="mb-3">
+                            <label class="form-label">Video File</label>
+                            <div class="upload-area" id="videoUploadArea">
+                                <i class="fas fa-video fa-2x"></i>
+                                <p>Click to upload video (MP4, WebM)</p>
+                                <input type="file" id="videoFile" accept="video/*" style="display:none">
+                                <div id="videoProgress" class="progress-upload"><div class="progress-bar bg-danger" style="width:0%"></div></div>
+                            </div>
+                            <input type="text" id="video_url" class="form-control mt-2" placeholder="Or paste video URL">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-danger w-100" id="saveMovieBtn">Save Movie</button>
+                        <div id="uploadStatus" class="mt-2 small text-center"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const CLOUD_NAME = 'drf0guw5w';
+        const UPLOAD_PRESET = 'indiemotion_unsigned';
+        const SB_URL = 'https://lxqxdtsgwgdogmncgaqj.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4cXhkdHNnd2dkb2dtbmNnYXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODkyMTgsImV4cCI6MjA5Njc2NTIxOH0.pkJOOXG9NkVqsRloO3lm1dRWXcrQESBlEiXW8g_Oh-8';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        let currentAdmin = null;
+        let genres = [], categories = [];
+
+        async function checkAdmin() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = '/admin-login.html'; return false; }
+            const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', session.user.id).single();
+            if (!profile || profile.role !== 'admin') { await supabaseClient.auth.signOut(); window.location.href = '/admin-login.html'; return false; }
+            currentAdmin = session.user;
+            document.getElementById('adminEmailDisplay').innerText = currentAdmin.email;
+            return true;
+        }
+
+        async function loadSelects() {
+            const { data: g } = await supabaseClient.from('genres').select('id,name').order('name');
+            genres = g || [];
+            const genreSelect = document.getElementById('genre_id');
+            genreSelect.innerHTML = '<option value="">Select Genre</option>' + genres.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+            const { data: c } = await supabaseClient.from('categories').select('id,name').order('name');
+            categories = c || [];
+            const catSelect = document.getElementById('category_id');
+            catSelect.innerHTML = '<option value="">Select Category</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        async function loadMovies() {
+            const { data, error } = await supabaseClient.from('movies').select('id, title, poster_url, genre_id, release_year, rating, views, genres(name)').order('created_at', { ascending: false });
+            if (error) { console.error(error); return; }
+            const tbody = document.getElementById('moviesTableBody');
+            if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" class="text-center">No movies found</td></tr>'; return; }
+            tbody.innerHTML = data.map(movie => `
+                <tr>
+                    <td><img src="${movie.poster_url || 'https://picsum.photos/50/75'}" class="img-thumbnail"></td>
+                    <td>${movie.title}</td>
+                    <td>${movie.genres?.name || '-'}</td>
+                    <td>${movie.release_year || '-'}</td>
+                    <td>${movie.rating || 0}</td>
+                    <td>${movie.views || 0}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editMovie('${movie.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteMovie('${movie.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Cloudinary upload function with progress
+        async function uploadFileToCloudinary(file, progressElementId) {
+            if (!file) return null;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+            
+            const progressDiv = document.getElementById(progressElementId);
+            if (progressDiv) {
+                progressDiv.style.display = 'block';
+                const progressBar = progressDiv.querySelector('.progress-bar');
+                progressBar.style.width = '0%';
+            }
+            
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`);
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable && progressDiv) {
+                        const percent = (e.loaded / e.total) * 100;
+                        const progressBar = progressDiv.querySelector('.progress-bar');
+                        progressBar.style.width = percent + '%';
+                    }
+                });
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (progressDiv) progressDiv.style.display = 'none';
+                        resolve(response.secure_url);
+                    } else {
+                        let errMsg = 'Upload failed';
+                        try { const err = JSON.parse(xhr.responseText); errMsg = err.error.message; } catch(e) {}
+                        reject(new Error(errMsg));
+                    }
+                };
+                xhr.onerror = () => reject(new Error('Network error'));
+                xhr.send(formData);
+            });
+        }
+
+        function openAddModal() {
+            document.getElementById('movieForm').reset();
+            document.getElementById('movieId').value = '';
+            document.getElementById('poster_url').value = '';
+            document.getElementById('video_url').value = '';
+            document.getElementById('movieModalTitle').innerText = 'Add Movie';
+            new bootstrap.Modal(document.getElementById('movieModal')).show();
+        }
+
+        async function editMovie(id) {
+            const { data, error } = await supabaseClient.from('movies').select('*').eq('id', id).single();
+            if (error) return;
+            document.getElementById('movieId').value = data.id;
+            document.getElementById('title').value = data.title || '';
+            document.getElementById('description').value = data.description || '';
+            document.getElementById('release_year').value = data.release_year || '';
+            document.getElementById('duration').value = data.duration || '';
+            document.getElementById('rating').value = data.rating || '';
+            document.getElementById('featured').value = data.featured ? 'true' : 'false';
+            document.getElementById('trailer_url').value = data.trailer_url || '';
+            document.getElementById('poster_url').value = data.poster_url || '';
+            document.getElementById('video_url').value = data.video_url || '';
+            if (data.genre_id) document.getElementById('genre_id').value = data.genre_id;
+            if (data.category_id) document.getElementById('category_id').value = data.category_id;
+            document.getElementById('movieModalTitle').innerText = 'Edit Movie';
+            new bootstrap.Modal(document.getElementById('movieModal')).show();
+        }
+
+        async function deleteMovie(id) {
+            if (!confirm('Delete this movie?')) return;
+            await supabaseClient.from('movies').delete().eq('id', id);
+            loadMovies();
+        }
+
+        document.getElementById('movieForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveMovieBtn');
+            const statusDiv = document.getElementById('uploadStatus');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            statusDiv.innerHTML = '';
+            
+            try {
+                const id = document.getElementById('movieId').value;
+                const title = document.getElementById('title').value;
+                const description = document.getElementById('description').value;
+                const release_year = parseInt(document.getElementById('release_year').value) || null;
+                const duration = parseInt(document.getElementById('duration').value) || null;
+                const rating = parseFloat(document.getElementById('rating').value) || 0;
+                const featured = document.getElementById('featured').value === 'true';
+                const trailer_url = document.getElementById('trailer_url').value;
+                const genre_id = document.getElementById('genre_id').value || null;
+                const category_id = document.getElementById('category_id').value || null;
+                let poster_url = document.getElementById('poster_url').value;
+                let video_url = document.getElementById('video_url').value;
+                
+                const posterFile = document.getElementById('posterFile').files[0];
+                const videoFile = document.getElementById('videoFile').files[0];
+                
+                if (posterFile) {
+                    statusDiv.innerHTML = 'Uploading poster...';
+                    poster_url = await uploadFileToCloudinary(posterFile, 'posterProgress');
+                }
+                if (videoFile) {
+                    statusDiv.innerHTML = 'Uploading video... (this may take a while)';
+                    video_url = await uploadFileToCloudinary(videoFile, 'videoProgress');
+                }
+                
+                const movieData = { title, description, release_year, duration, rating, featured, trailer_url, genre_id, category_id, poster_url, video_url };
+                
+                if (id) {
+                    await supabaseClient.from('movies').update(movieData).eq('id', id);
+                    statusDiv.innerHTML = '<span class="text-success">Movie updated successfully!</span>';
+                } else {
+                    await supabaseClient.from('movies').insert(movieData);
+                    statusDiv.innerHTML = '<span class="text-success">Movie added successfully!</span>';
+                }
+                
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('movieModal')).hide();
+                    loadMovies();
+                }, 1000);
+            } catch (err) {
+                statusDiv.innerHTML = '<span class="text-danger">Error: ' + err.message + '</span>';
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = 'Save Movie';
+            }
+        });
+
+        document.getElementById('posterUploadArea').addEventListener('click', () => document.getElementById('posterFile').click());
+        document.getElementById('videoUploadArea').addEventListener('click', () => document.getElementById('videoFile').click());
+
+        function setupLogout() {
+            const fn = async () => { await supabaseClient.auth.signOut(); window.location.href = '/admin-login.html'; };
+            document.getElementById('adminLogoutBtn')?.addEventListener('click', fn);
+            document.getElementById('adminLogoutBtnSidebar')?.addEventListener('click', fn);
+        }
+
+        (async () => {
+            if (await checkAdmin()) {
+                await loadSelects();
+                await loadMovies();
+                setupLogout();
+            }
+        })();
+    </script>
+</body>
+</html>

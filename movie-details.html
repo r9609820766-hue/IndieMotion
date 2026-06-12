@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IndieMotion - Movie Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Remove negative margin that pulls content up */
+        .movie-backdrop {
+            position: relative;
+            background-size: cover;
+            background-position: center 30%;
+            padding: 2rem 0 4rem 0;
+            margin-top: 0;
+            z-index: 0;
+        }
+        .movie-backdrop::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(0deg, #141414 0%, rgba(0,0,0,0.6) 100%);
+            z-index: 1;
+        }
+        .movie-backdrop .container {
+            position: relative;
+            z-index: 2;
+        }
+        /* Poster image - full display without cropping */
+        .movie-poster {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: block;
+        }
+        .poster-container {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        .poster-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .rating-star {
+            cursor: pointer;
+            font-size: 1.8rem;
+            transition: transform 0.1s;
+            margin-right: 5px;
+        }
+        .rating-star:hover {
+            transform: scale(1.1);
+        }
+        .similar-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .similar-card:hover {
+            transform: scale(1.05);
+        }
+        .similar-card img {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        /* Ensure content starts below fixed navbar */
+        body {
+            padding-top: 76px;
+        }
+        @media (max-width: 768px) {
+            .movie-backdrop { padding: 1rem 0 2rem 0; }
+            .rating-star { font-size: 1.2rem; }
+            body { padding-top: 60px; }
+        }
+    </style>
+</head>
+<body class="bg-dark-dark">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
+        <div class="container-fluid px-4 px-lg-5">
+            <a class="navbar-brand fw-bold fs-3" href="index.html"><span style="color: white;">Indie</span><span style="color: #e50914;">Motion</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="movies.html">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Series</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3" id="authNav"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Movie Backdrop Section - Now with proper top spacing -->
+    <div class="movie-backdrop" id="movieBackdrop" style="background-image: url('https://picsum.photos/id/0/1200/500');">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="poster-container">
+                        <img id="moviePoster" class="movie-poster" src="https://picsum.photos/id/0/300/450" alt="Poster">
+                    </div>
+                </div>
+                <div class="col-md-8 col-lg-9">
+                    <h1 id="movieTitle" class="display-4 fw-bold text-white">Loading...</h1>
+                    <div class="d-flex flex-wrap gap-3 my-3 text-white-50">
+                        <span id="movieYear"></span>
+                        <span><i class="fas fa-clock"></i> <span id="movieDuration"></span> min</span>
+                        <span><i class="fas fa-star text-warning"></i> <span id="movieRating"></span> / 5</span>
+                        <span><i class="fas fa-eye"></i> <span id="movieViews"></span> views</span>
+                        <span id="movieGenre" class="badge bg-danger"></span>
+                    </div>
+                    <p id="movieDescription" class="lead text-white-50"></p>
+                    <div class="d-flex flex-wrap gap-3 mt-4">
+                        <button id="watchNowBtn" class="btn btn-danger btn-lg px-4"><i class="fas fa-play me-2"></i>Watch Now</button>
+                        <button id="trailerBtn" class="btn btn-outline-light btn-lg px-4" data-bs-toggle="modal" data-bs-target="#trailerModal"><i class="fas fa-video me-2"></i>Trailer</button>
+                        <button id="watchlistBtn" class="btn btn-outline-secondary btn-lg px-4"><i class="fas fa-plus me-2"></i>Watchlist</button>
+                    </div>
+                    <!-- Rating Section -->
+                    <div class="mt-5 pt-3 border-top border-secondary">
+                        <h5 class="text-white">Rate this movie</h5>
+                        <div id="ratingStars" class="d-flex">
+                            <i class="far fa-star rating-star" data-rating="1"></i>
+                            <i class="far fa-star rating-star" data-rating="2"></i>
+                            <i class="far fa-star rating-star" data-rating="3"></i>
+                            <i class="far fa-star rating-star" data-rating="4"></i>
+                            <i class="far fa-star rating-star" data-rating="5"></i>
+                        </div>
+                        <p id="ratingMessage" class="small text-white-50 mt-2"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Movies -->
+    <div class="container-fluid px-4 px-lg-5 mt-5">
+        <h3 class="section-title mb-4">You May Also Like</h3>
+        <div class="row g-4" id="similarMoviesGrid">
+            <div class="col-12 text-center"><div class="spinner-border text-danger"></div></div>
+        </div>
+    </div>
+
+    <!-- Trailer Modal -->
+    <div class="modal fade" id="trailerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white">Trailer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="ratio ratio-16x9">
+                        <iframe id="trailerIframe" src="" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-4 text-center text-white-50 small">
+        <p>&copy; 2025 IndieMotion. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="main.js"></script>
+    <script>
+        let movieId = null;
+        let currentMovie = null;
+        let userRating = 0;
+        let isInWatchlist = false;
+
+        function getMovieIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        async function loadMovieDetails() {
+            if (!movieId) return;
+            const { data, error } = await window.supabaseClient
+                .from('movies')
+                .select('*, genres(name)')
+                .eq('id', movieId)
+                .single();
+            if (error) {
+                console.error(error);
+                document.getElementById('movieTitle').innerText = 'Movie not found';
+                return;
+            }
+            currentMovie = data;
+            document.getElementById('movieTitle').innerText = data.title;
+            document.getElementById('movieDescription').innerText = data.description || 'No description available.';
+            document.getElementById('movieYear').innerHTML = `<i class="fas fa-calendar-alt me-1"></i> ${data.release_year || 'N/A'}`;
+            document.getElementById('movieDuration').innerText = data.duration || '?';
+            document.getElementById('movieRating').innerText = (data.rating || 0).toFixed(1);
+            document.getElementById('movieViews').innerText = data.views || 0;
+            document.getElementById('movieGenre').innerText = data.genres?.name || 'Uncategorized';
+            
+            const posterImg = document.getElementById('moviePoster');
+            if (data.poster_url && data.poster_url.trim() !== '') {
+                posterImg.src = data.poster_url;
+                document.getElementById('movieBackdrop').style.backgroundImage = `linear-gradient(0deg, #141414 0%, rgba(0,0,0,0.6) 100%), url(${data.poster_url.replace('300/450', '1200/500')})`;
+            } else {
+                posterImg.src = 'https://picsum.photos/id/0/300/450';
+            }
+            
+            if (data.trailer_url && data.trailer_url.trim() !== '') {
+                let trailerUrl = data.trailer_url;
+                if (trailerUrl.includes('youtube.com/watch?v=')) {
+                    trailerUrl = trailerUrl.replace('watch?v=', 'embed/');
+                } else if (trailerUrl.includes('youtu.be/')) {
+                    const id = trailerUrl.split('youtu.be/')[1].split('?')[0];
+                    trailerUrl = `https://www.youtube.com/embed/${id}`;
+                }
+                document.getElementById('trailerIframe').src = trailerUrl;
+            }
+            document.getElementById('watchNowBtn').onclick = () => window.location.href = `watch.html?type=movie&id=${movieId}`;
+        }
+
+        async function checkWatchlistStatus() {
+            if (!window.currentUser || !movieId) return;
+            const { data, error } = await window.supabaseClient
+                .from('watchlist')
+                .select('id')
+                .eq('user_id', window.currentUser.id)
+                .eq('content_type', 'movie')
+                .eq('content_id', movieId)
+                .maybeSingle();
+            if (!error && data) {
+                isInWatchlist = true;
+                document.getElementById('watchlistBtn').innerHTML = '<i class="fas fa-check me-2"></i>In Watchlist';
+            } else {
+                isInWatchlist = false;
+                document.getElementById('watchlistBtn').innerHTML = '<i class="fas fa-plus me-2"></i>Watchlist';
+            }
+        }
+
+        async function toggleWatchlist() {
+            if (!window.currentUser) {
+                alert('Please login to manage watchlist');
+                window.location.href = 'auth.html';
+                return;
+            }
+            if (isInWatchlist) {
+                const { error } = await window.supabaseClient
+                    .from('watchlist')
+                    .delete()
+                    .eq('user_id', window.currentUser.id)
+                    .eq('content_type', 'movie')
+                    .eq('content_id', movieId);
+                if (!error) {
+                    isInWatchlist = false;
+                    document.getElementById('watchlistBtn').innerHTML = '<i class="fas fa-plus me-2"></i>Watchlist';
+                }
+            } else {
+                const { error } = await window.supabaseClient
+                    .from('watchlist')
+                    .insert({ user_id: window.currentUser.id, content_type: 'movie', content_id: movieId });
+                if (!error) {
+                    isInWatchlist = true;
+                    document.getElementById('watchlistBtn').innerHTML = '<i class="fas fa-check me-2"></i>In Watchlist';
+                }
+            }
+        }
+
+        function setupRatingStars() {
+            const stars = document.querySelectorAll('#ratingStars i');
+            stars.forEach(star => {
+                star.addEventListener('mouseenter', function() {
+                    const val = parseInt(this.dataset.rating);
+                    highlightStars(val);
+                });
+                star.addEventListener('mouseleave', () => highlightStars(userRating));
+                star.addEventListener('click', async function() {
+                    const rating = parseInt(this.dataset.rating);
+                    if (!window.currentUser) {
+                        alert('Please login to rate');
+                        window.location.href = 'auth.html';
+                        return;
+                    }
+                    const { error } = await window.supabaseClient
+                        .from('ratings')
+                        .upsert({ user_id: window.currentUser.id, content_type: 'movie', content_id: movieId, rating: rating }, 
+                                 { onConflict: 'user_id, content_type, content_id' });
+                    if (!error) {
+                        userRating = rating;
+                        highlightStars(userRating);
+                        document.getElementById('ratingMessage').innerText = 'Thank you for rating!';
+                        loadMovieDetails();
+                    } else {
+                        document.getElementById('ratingMessage').innerText = 'Error saving rating';
+                    }
+                });
+            });
+        }
+
+        function highlightStars(rating) {
+            const stars = document.querySelectorAll('#ratingStars i');
+            stars.forEach((star, idx) => {
+                if (idx < rating) star.className = 'fas fa-star rating-star text-warning';
+                else star.className = 'far fa-star rating-star text-white-50';
+            });
+        }
+
+        async function loadUserRating() {
+            if (!window.currentUser || !movieId) return;
+            const { data, error } = await window.supabaseClient
+                .from('ratings')
+                .select('rating')
+                .eq('user_id', window.currentUser.id)
+                .eq('content_type', 'movie')
+                .eq('content_id', movieId)
+                .maybeSingle();
+            if (!error && data) {
+                userRating = data.rating;
+                highlightStars(userRating);
+            }
+        }
+
+        async function loadSimilarMovies() {
+            if (!currentMovie) return;
+            const { data, error } = await window.supabaseClient
+                .from('movies')
+                .select('id, title, poster_url, release_year, rating')
+                .eq('genre_id', currentMovie.genre_id)
+                .neq('id', movieId)
+                .limit(6);
+            if (error || !data || data.length === 0) {
+                document.getElementById('similarMoviesGrid').innerHTML = '<div class="col-12 text-white-50 text-center">No similar movies found.</div>';
+                return;
+            }
+            const grid = document.getElementById('similarMoviesGrid');
+            grid.innerHTML = data.map(movie => `
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="similar-card" onclick="window.location.href='movie-details.html?id=${movie.id}'">
+                        <img src="${movie.poster_url || 'https://picsum.photos/id/0/300/450'}" alt="${movie.title}" loading="lazy">
+                        <div class="mt-2">
+                            <h6 class="text-white text-truncate mb-0">${movie.title}</h6>
+                            <div class="d-flex justify-content-between small text-white-50">
+                                <span>${movie.release_year || 'N/A'}</span>
+                                <span><i class="fas fa-star text-warning"></i> ${movie.rating?.toFixed(1) || '0'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        movieId = getMovieIdFromUrl();
+        if (!movieId) {
+            document.querySelector('.movie-backdrop').innerHTML = '<div class="alert alert-danger text-center">Invalid movie ID</div>';
+        } else {
+            document.addEventListener('DOMContentLoaded', async () => {
+                await loadMovieDetails();
+                await loadSimilarMovies();
+                setupRatingStars();
+                await checkWatchlistStatus();
+                await loadUserRating();
+                document.getElementById('watchlistBtn').addEventListener('click', toggleWatchlist);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Genres - IndieMotion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: white; }
+        .navbar-admin { background: #0f0f0f; border-bottom: 1px solid #222; padding: 0.75rem 1.5rem; }
+        .navbar-brand { font-size: 1.8rem; font-weight: 800; }
+        .navbar-brand .indie { color: white; }
+        .navbar-brand .motion { color: #e50914; }
+        .offcanvas { background: linear-gradient(180deg, #0f0f0f 0%, #050505 100%); width: 280px; border-right: 1px solid #222; }
+        .nav-admin .nav-link { color: #b3b3b3; padding: 0.75rem 1rem; border-radius: 12px; transition: 0.2s; font-weight: 500; }
+        .nav-admin .nav-link i { width: 28px; margin-right: 8px; }
+        .nav-admin .nav-link:hover, .nav-admin .nav-link.active { background: #e50914; color: white; }
+        .admin-content { padding: 2rem; margin-top: 70px; }
+        .btn-danger { background-color: #e50914; border: none; }
+        .btn-danger:hover { background-color: #f6121d; }
+        .table-dark-custom { background-color: #141414; }
+        .table-dark-custom th { border-bottom-color: #333; }
+        .modal-content { background: #141414; border: 1px solid #333; }
+        .form-control { background-color: #2c2c2c; border: 1px solid #404040; color: white; }
+        .form-control:focus { border-color: #e50914; box-shadow: 0 0 0 0.2rem rgba(229,9,20,0.25); }
+        @media (max-width: 768px) { .admin-content { padding: 1rem; } }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-admin fixed-top">
+        <div class="container-fluid">
+            <button class="btn btn-link text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar">
+                <i class="fas fa-bars fs-4"></i>
+            </button>
+            <a class="navbar-brand mx-auto" href="#"><span class="indie">Indie</span><span class="motion">Motion</span></a>
+            <div class="dropdown">
+                <button class="btn btn-link text-white dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle fs-4"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                    <li><span id="adminEmailDisplay" class="dropdown-item-text small text-white-50"></span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" id="adminLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="adminSidebar">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title text-white">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="nav nav-admin flex-column">
+                <li class="nav-item"><a class="nav-link" href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-movies.html"><i class="fas fa-film"></i> Movies</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-series.html"><i class="fas fa-tv"></i> Series</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-categories.html"><i class="fas fa-tags"></i> Categories</a></li>
+                <li class="nav-item"><a class="nav-link active" href="admin-genres.html"><i class="fas fa-music"></i> Genres</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-users.html"><i class="fas fa-users"></i> Users</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-reports.html"><i class="fas fa-chart-line"></i> Reports</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+            <hr class="bg-secondary my-4">
+            <button id="adminLogoutBtnSidebar" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Manage Genres</h2>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#genreModal" onclick="openGenreModal()">
+                <i class="fas fa-plus me-2"></i>Add Genre
+            </button>
+        </div>
+
+        <!-- Genres Table -->
+        <div class="table-responsive">
+            <table class="table table-dark table-hover table-dark-custom">
+                <thead>
+                    <tr><th>ID</th><th>Name</th><th>Created At</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="genresTableBody">
+                    <tr><td colspan="4" class="text-center">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Genre Modal -->
+    <div class="modal fade" id="genreModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white" id="genreModalTitle">Add Genre</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="genreForm">
+                        <input type="hidden" id="genreId">
+                        <div class="mb-3">
+                            <label class="form-label">Genre Name*</label>
+                            <input type="text" id="genreName" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Save Genre</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SB_URL = 'https://lxqxdtsgwgdogmncgaqj.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4cXhkdHNnd2dkb2dtbmNnYXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODkyMTgsImV4cCI6MjA5Njc2NTIxOH0.pkJOOXG9NkVqsRloO3lm1dRWXcrQESBlEiXW8g_Oh-8';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        let currentAdmin = null;
+
+        async function checkAdmin() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = '/admin-login.html'; return false; }
+            const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', session.user.id).single();
+            if (!profile || profile.role !== 'admin') { await supabaseClient.auth.signOut(); window.location.href = '/admin-login.html'; return false; }
+            currentAdmin = session.user;
+            document.getElementById('adminEmailDisplay').innerText = currentAdmin.email;
+            return true;
+        }
+
+        async function loadGenres() {
+            const { data, error } = await supabaseClient.from('genres').select('*').order('name');
+            if (error) { console.error(error); return; }
+            const tbody = document.getElementById('genresTableBody');
+            if (!data.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center">No genres found</td></tr>'; return; }
+            tbody.innerHTML = data.map(genre => `
+                <tr>
+                    <td><code>${genre.id.substring(0,8)}...</code></td>
+                    <td>${genre.name}</td>
+                    <td>${new Date(genre.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editGenre('${genre.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteGenre('${genre.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openGenreModal(id = null) {
+            if (id) {
+                supabaseClient.from('genres').select('*').eq('id', id).single().then(({ data }) => {
+                    if (data) {
+                        document.getElementById('genreId').value = data.id;
+                        document.getElementById('genreName').value = data.name;
+                        document.getElementById('genreModalTitle').innerText = 'Edit Genre';
+                        new bootstrap.Modal(document.getElementById('genreModal')).show();
+                    }
+                });
+            } else {
+                document.getElementById('genreForm').reset();
+                document.getElementById('genreId').value = '';
+                document.getElementById('genreModalTitle').innerText = 'Add Genre';
+                new bootstrap.Modal(document.getElementById('genreModal')).show();
+            }
+        }
+
+        document.getElementById('genreForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('genreId').value;
+            const name = document.getElementById('genreName').value.trim();
+            if (!name) return;
+            if (id) {
+                await supabaseClient.from('genres').update({ name }).eq('id', id);
+            } else {
+                await supabaseClient.from('genres').insert({ name });
+            }
+            bootstrap.Modal.getInstance(document.getElementById('genreModal')).hide();
+            loadGenres();
+        });
+
+        async function deleteGenre(id) {
+            if (!confirm('Delete this genre? It may affect movies/series using it.')) return;
+            await supabaseClient.from('genres').delete().eq('id', id);
+            loadGenres();
+        }
+
+        function setupLogout() {
+            const fn = async () => { await supabaseClient.auth.signOut(); window.location.href = '/admin-login.html'; };
+            document.getElementById('adminLogoutBtn')?.addEventListener('click', fn);
+            document.getElementById('adminLogoutBtnSidebar')?.addEventListener('click', fn);
+        }
+
+        (async () => {
+            if (await checkAdmin()) {
+                await loadGenres();
+                setupLogout();
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - IndieMotion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: white;
+        }
+        /* Top Navbar */
+        .navbar-admin {
+            background: #0f0f0f;
+            border-bottom: 1px solid #222;
+            padding: 0.75rem 1.5rem;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        .navbar-brand span {
+            color: #e50914;
+        }
+        .nav-link, .dropdown-item {
+            color: #b3b3b3;
+        }
+        .nav-link:hover, .dropdown-item:hover {
+            color: #e50914;
+        }
+        /* Sidebar (Offcanvas) */
+        .offcanvas {
+            background: linear-gradient(180deg, #0f0f0f 0%, #050505 100%);
+            width: 280px;
+            border-right: 1px solid #222;
+        }
+        .offcanvas-header {
+            border-bottom: 1px solid #222;
+        }
+        .nav-admin .nav-item {
+            margin-bottom: 0.5rem;
+        }
+        .nav-admin .nav-link {
+            color: #b3b3b3;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .nav-admin .nav-link i {
+            width: 28px;
+            margin-right: 8px;
+        }
+        .nav-admin .nav-link:hover, .nav-admin .nav-link.active {
+            background: #e50914;
+            color: white;
+        }
+        /* Main content */
+        .admin-content {
+            padding: 2rem;
+        }
+        .stats-card {
+            background: #141414;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid #2a2a2a;
+            transition: transform 0.2s;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            border-color: #e50914;
+        }
+        .stats-icon {
+            font-size: 2.5rem;
+            color: #e50914;
+            margin-bottom: 1rem;
+        }
+        .stats-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+        }
+        .chart-container {
+            background: #141414;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid #2a2a2a;
+        }
+        .btn-logout {
+            background: #1f1f1f;
+            border: 1px solid #333;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            width: 100%;
+        }
+        .btn-logout:hover {
+            background: #e50914;
+            border-color: #e50914;
+        }
+        @media (max-width: 768px) {
+            .admin-content {
+                padding: 1rem;
+            }
+            .stats-number {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navbar with Hamburger -->
+    <nav class="navbar navbar-admin fixed-top">
+        <div class="container-fluid">
+            <button class="btn btn-link text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar">
+                <i class="fas fa-bars fs-4"></i>
+            </button>
+            <a class="navbar-brand mx-auto" href="#"><span style="color: white;">Indie</span><span style="color: #e50914;">Motion</span></a>
+            <div class="dropdown">
+                <button class="btn btn-link text-white dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle fs-4"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                    <li><span id="adminEmailDisplay" class="dropdown-item-text small text-white-50"></span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" id="adminLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Offcanvas Sidebar -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="adminSidebar" aria-labelledby="adminSidebarLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title text-white" id="adminSidebarLabel">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="nav nav-admin flex-column">
+                <li class="nav-item"><a class="nav-link active" href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-movies.html"><i class="fas fa-film"></i> Movies</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-series.html"><i class="fas fa-tv"></i> Series</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-categories.html"><i class="fas fa-tags"></i> Categories</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-genres.html"><i class="fas fa-music"></i> Genres</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-users.html"><i class="fas fa-users"></i> Users</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-reports.html"><i class="fas fa-chart-line"></i> Reports</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+            <hr class="bg-secondary my-4">
+            <button id="adminLogoutBtnSidebar" class="btn btn-logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+        </div>
+    </div>
+
+    <!-- Main Content (shifted down for fixed navbar) -->
+    <div class="admin-content" style="margin-top: 70px;">
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stats-card text-center">
+                    <div class="stats-icon"><i class="fas fa-users"></i></div>
+                    <div class="stats-number" id="totalUsers">-</div>
+                    <div class="text-white-50">Total Users</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card text-center">
+                    <div class="stats-icon"><i class="fas fa-film"></i></div>
+                    <div class="stats-number" id="totalMovies">-</div>
+                    <div class="text-white-50">Movies</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card text-center">
+                    <div class="stats-icon"><i class="fas fa-eye"></i></div>
+                    <div class="stats-number" id="totalViews">-</div>
+                    <div class="text-white-50">Total Views</div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h5 class="mb-3">Top 5 Most Watched Movies</h5>
+                    <canvas id="topMoviesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SB_URL = 'https://lxqxdtsgwgdogmncgaqj.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4cXhkdHNnd2dkb2dtbmNnYXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODkyMTgsImV4cCI6MjA5Njc2NTIxOH0.pkJOOXG9NkVqsRloO3lm1dRWXcrQESBlEiXW8g_Oh-8';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        let currentAdmin = null;
+
+        async function checkAdmin() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = '/admin-login.html';
+                return false;
+            }
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('role, name')
+                .eq('id', session.user.id)
+                .single();
+            if (!profile || profile.role !== 'admin') {
+                await supabaseClient.auth.signOut();
+                window.location.href = '/admin-login.html';
+                return false;
+            }
+            currentAdmin = session.user;
+            document.getElementById('adminEmailDisplay').innerText = currentAdmin.email;
+            return true;
+        }
+
+        async function loadStats() {
+            const { count: usersCount } = await supabaseClient
+                .from('profiles')
+                .select('*', { count: 'exact', head: true });
+            document.getElementById('totalUsers').innerText = usersCount || 0;
+
+            const { count: moviesCount } = await supabaseClient
+                .from('movies')
+                .select('*', { count: 'exact', head: true });
+            document.getElementById('totalMovies').innerText = moviesCount || 0;
+
+            const { data: movies } = await supabaseClient
+                .from('movies')
+                .select('views');
+            const totalViews = movies?.reduce((sum, m) => sum + (m.views || 0), 0) || 0;
+            document.getElementById('totalViews').innerText = totalViews.toLocaleString();
+
+            const { data: topMovies } = await supabaseClient
+                .from('movies')
+                .select('title, views')
+                .order('views', { ascending: false })
+                .limit(5);
+            if (topMovies && topMovies.length) {
+                const ctx = document.getElementById('topMoviesChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: topMovies.map(m => m.title.length > 20 ? m.title.substring(0,20)+'...' : m.title),
+                        datasets: [{
+                            label: 'Views',
+                            data: topMovies.map(m => m.views || 0),
+                            backgroundColor: '#e50914',
+                            borderRadius: 8,
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { legend: { labels: { color: 'white' } } },
+                        scales: {
+                            y: { ticks: { color: 'white' }, grid: { color: '#333' } },
+                            x: { ticks: { color: 'white' }, grid: { display: false } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('topMoviesChart').innerHTML = '<div class="text-white-50 text-center py-5">No data available</div>';
+            }
+        }
+
+        function setupLogout() {
+            const logoutHandler = async () => {
+                await supabaseClient.auth.signOut();
+                window.location.href = '/admin-login.html';
+            };
+            document.getElementById('adminLogoutBtn')?.addEventListener('click', logoutHandler);
+            document.getElementById('adminLogoutBtnSidebar')?.addEventListener('click', logoutHandler);
+        }
+
+        (async () => {
+            const isAdmin = await checkAdmin();
+            if (isAdmin) {
+                await loadStats();
+                setupLogout();
+            }
+        })();
+    </script>
+</body>
+</html>

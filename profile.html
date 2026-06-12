@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IndieMotion - My Profile</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .profile-tabs .nav-link {
+            color: #b3b3b3;
+            background: transparent;
+            border: none;
+            font-weight: 600;
+        }
+        .profile-tabs .nav-link.active {
+            color: #e50914;
+            border-bottom: 2px solid #e50914;
+            background: transparent;
+        }
+        .history-item, .watchlist-item {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: transform 0.2s;
+        }
+        .history-item:hover, .watchlist-item:hover {
+            transform: translateX(5px);
+            background: #252525;
+        }
+        .progress-bar-custom {
+            height: 4px;
+            background: #e50914;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-dark-dark">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
+        <div class="container-fluid px-4 px-lg-5">
+            <a class="navbar-brand fw-bold fs-3" href="index.html">Indie<span class="text-danger">Motion</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="movies.html">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" id="navSeriesLink">Series</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3" id="authNav"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 px-lg-5 pt-5 mt-5">
+        <div class="row">
+            <!-- Sidebar / Profile Info -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="glass-card text-center">
+                    <i class="fas fa-user-circle fa-5x text-white-50 mb-3"></i>
+                    <h4 id="profileName" class="text-white">Loading...</h4>
+                    <p id="profileEmail" class="text-white-50"></p>
+                    <button class="btn btn-outline-danger btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="fas fa-edit me-1"></i> Edit Profile
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content Tabs -->
+            <div class="col-md-8 col-lg-9">
+                <ul class="nav profile-tabs mb-4" id="profileTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">Watch History</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="watchlist-tab" data-bs-toggle="tab" data-bs-target="#watchlist" type="button" role="tab">Watchlist</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="account-tab" data-bs-toggle="tab" data-bs-target="#account" type="button" role="tab">Account Settings</button>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <!-- History Tab -->
+                    <div class="tab-pane fade show active" id="history" role="tabpanel">
+                        <h5 class="text-white mb-3">Continue Watching</h5>
+                        <div id="historyList" class="mb-4"></div>
+                        <h5 class="text-white mb-3 mt-4">Completed</h5>
+                        <div id="completedList"></div>
+                    </div>
+                    <!-- Watchlist Tab -->
+                    <div class="tab-pane fade" id="watchlist" role="tabpanel">
+                        <div id="watchlistList"></div>
+                    </div>
+                    <!-- Account Tab -->
+                    <div class="tab-pane fade" id="account" role="tabpanel">
+                        <div class="glass-card">
+                            <h5 class="text-white mb-3">Account Actions</h5>
+                            <button class="btn btn-danger w-100 mb-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                <i class="fas fa-key me-2"></i>Change Password
+                            </button>
+                            <button class="btn btn-outline-danger w-100" id="logoutBtnProfile">
+                                <i class="fas fa-sign-out-alt me-2"></i>Sign Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white">Edit Profile</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProfileForm">
+                        <div class="mb-3">
+                            <label class="form-label text-white">Full Name</label>
+                            <input type="text" class="form-control" id="editName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Email</label>
+                            <input type="email" class="form-control" id="editEmail" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white">Change Password</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label class="form-label text-white">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Update Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-4 text-center text-white-50 small">
+        <p>&copy; 2025 IndieMotion. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase client
+        const SUPABASE_URL = 'https://lxqxdtsgwgdogmncgaqj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4cXhkdHNnd2dkb2dtbmNnYXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODkyMTgsImV4cCI6MjA5Njc2NTIxOH0.pkJOOXG9NkVqsRloO3lm1dRWXcrQESBlEiXW8g_Oh-8';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentUser = null;
+
+        // Check authentication
+        async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = '/auth.html';
+                return;
+            }
+            currentUser = session.user;
+            await loadProfile();
+            loadHistory();
+            loadWatchlist();
+            updateAuthNav();
+        }
+
+        async function loadProfile() {
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('name')
+                .eq('id', currentUser.id)
+                .single();
+            if (!error && data) {
+                document.getElementById('profileName').innerText = data.name || currentUser.email.split('@')[0];
+                document.getElementById('profileEmail').innerText = currentUser.email;
+                document.getElementById('editName').value = data.name || '';
+                document.getElementById('editEmail').value = currentUser.email;
+            } else {
+                document.getElementById('profileName').innerText = currentUser.email.split('@')[0];
+                document.getElementById('profileEmail').innerText = currentUser.email;
+            }
+        }
+
+        async function loadHistory() {
+            const { data: history, error } = await supabaseClient
+                .from('watch_history')
+                .select('content_type, content_id, progress_seconds, watched_at')
+                .eq('user_id', currentUser.id)
+                .order('watched_at', { ascending: false });
+            if (error || !history) return;
+
+            const inProgress = [];
+            const completed = [];
+            
+            for (const record of history) {
+                let title = 'Unknown';
+                let duration = 0;
+                let poster = '';
+                let link = '#';
+                
+                if (record.content_type === 'movie') {
+                    const { data: movie } = await supabaseClient
+                        .from('movies')
+                        .select('title, duration, poster_url')
+                        .eq('id', record.content_id)
+                        .single();
+                    if (movie) {
+                        title = movie.title;
+                        duration = movie.duration || 0;
+                        poster = movie.poster_url;
+                        link = `/watch/movie/${record.content_id}`;
+                    }
+                } else if (record.content_type === 'episode') {
+                    const { data: episode } = await supabaseClient
+                        .from('episodes')
+                        .select('title, duration, thumbnail, season_id')
+                        .eq('id', record.content_id)
+                        .single();
+                    if (episode) {
+                        title = `Episode: ${episode.title}`;
+                        duration = episode.duration || 0;
+                        poster = episode.thumbnail;
+                        link = `/watch/episode/${record.content_id}`;
+                    }
+                }
+                
+                const progressPercent = duration > 0 ? (record.progress_seconds / duration) * 100 : 0;
+                const isCompleted = progressPercent >= 90;
+                const item = { title, link, progressPercent, progressSeconds: record.progress_seconds, duration, poster, record };
+                
+                if (isCompleted) completed.push(item);
+                else inProgress.push(item);
+            }
+            
+            renderHistoryList('historyList', inProgress, 'No in-progress content');
+            renderHistoryList('completedList', completed, 'No completed content');
+        }
+
+        function renderHistoryList(containerId, items, emptyMsg) {
+            const container = document.getElementById(containerId);
+            if (!items.length) {
+                container.innerHTML = `<p class="text-white-50">${emptyMsg}</p>`;
+                return;
+            }
+            container.innerHTML = items.map(item => `
+                <div class="history-item d-flex justify-content-between align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white mb-1">${item.title}</h6>
+                        <div class="progress w-75" style="height:4px">
+                            <div class="progress-bar-custom" style="width: ${Math.min(item.progressPercent, 100)}%"></div>
+                        </div>
+                        <small class="text-white-50">${Math.floor(item.progressSeconds/60)}:${(item.progressSeconds%60).toString().padStart(2,'0')} / ${Math.floor(item.duration/60)}:${(item.duration%60).toString().padStart(2,'0')}</small>
+                    </div>
+                    <a href="${item.link}" class="btn btn-sm btn-danger">Resume</a>
+                </div>
+            `).join('');
+        }
+
+        async function loadWatchlist() {
+            const { data: watchlist, error } = await supabaseClient
+                .from('watchlist')
+                .select('content_type, content_id, added_at')
+                .eq('user_id', currentUser.id)
+                .order('added_at', { ascending: false });
+            if (error || !watchlist) return;
+            
+            const items = [];
+            for (const wl of watchlist) {
+                let title = 'Unknown';
+                let poster = '';
+                let link = '#';
+                let typeLabel = '';
+                
+                if (wl.content_type === 'movie') {
+                    const { data: movie } = await supabaseClient
+                        .from('movies')
+                        .select('title, poster_url')
+                        .eq('id', wl.content_id)
+                        .single();
+                    if (movie) {
+                        title = movie.title;
+                        poster = movie.poster_url;
+                        link = `/movie/${wl.content_id}`;
+                        typeLabel = 'Movie';
+                    }
+                } else if (wl.content_type === 'series') {
+                    const { data: series } = await supabaseClient
+                        .from('series')
+                        .select('title, poster_url')
+                        .eq('id', wl.content_id)
+                        .single();
+                    if (series) {
+                        title = series.title;
+                        poster = series.poster_url;
+                        link = `/series/${wl.content_id}`;
+                        typeLabel = 'Series';
+                    }
+                }
+                items.push({ title, poster, link, typeLabel, id: wl.content_id, type: wl.content_type });
+            }
+            
+            const container = document.getElementById('watchlistList');
+            if (!items.length) {
+                container.innerHTML = '<p class="text-white-50">Your watchlist is empty.</p>';
+                return;
+            }
+            container.innerHTML = items.map(item => `
+                <div class="watchlist-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="${item.poster || 'https://picsum.photos/id/0/50/75'}" style="width: 50px; height: 75px; object-fit: cover; border-radius: 4px;">
+                        <div>
+                            <h6 class="text-white mb-0">${item.title}</h6>
+                            <span class="badge bg-secondary">${item.typeLabel}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="${item.link}" class="btn btn-sm btn-outline-light me-2">View</a>
+                        <button class="btn btn-sm btn-outline-danger remove-watchlist" data-type="${item.type}" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add remove event listeners
+            document.querySelectorAll('.remove-watchlist').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const type = btn.dataset.type;
+                    const id = btn.dataset.id;
+                    await supabaseClient
+                        .from('watchlist')
+                        .delete()
+                        .eq('user_id', currentUser.id)
+                        .eq('content_type', type)
+                        .eq('content_id', id);
+                    loadWatchlist(); // refresh
+                });
+            });
+        }
+
+        function updateAuthNav() {
+            const authNav = document.getElementById('authNav');
+            if (!authNav) return;
+            authNav.innerHTML = `
+                <div class="dropdown">
+                    <button class="btn btn-link text-decoration-none text-white dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle fs-4"></i>
+                        <span>${currentUser.email?.split('@')[0] || 'User'}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item active" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="logoutBtnNav"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            `;
+            document.getElementById('logoutBtnNav')?.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await supabaseClient.auth.signOut();
+                window.location.href = '/index.html';
+            });
+        }
+
+        // Edit profile
+        document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('editName').value;
+            const email = document.getElementById('editEmail').value;
+            
+            // Update profile name
+            const { error: profileError } = await supabaseClient
+                .from('profiles')
+                .update({ name: name })
+                .eq('id', currentUser.id);
+            if (profileError) alert('Error updating name');
+            
+            // Update email if changed
+            if (email !== currentUser.email) {
+                const { error: emailError } = await supabaseClient.auth.updateUser({ email: email });
+                if (emailError) alert('Error updating email: ' + emailError.message);
+                else alert('Email updated. Please verify your new email.');
+            }
+            location.reload();
+        });
+
+        // Change password
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            if (newPass !== confirm) {
+                alert('Passwords do not match');
+                return;
+            }
+            if (newPass.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+            const { error } = await supabaseClient.auth.updateUser({ password: newPass });
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert('Password changed successfully');
+                bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                document.getElementById('changePasswordForm').reset();
+            }
+        });
+
+        document.getElementById('logoutBtnProfile').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            window.location.href = '/index.html';
+        });
+
+        checkAuth();
+    </script>
+</body>
+</html>

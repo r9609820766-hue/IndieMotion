@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - IndieMotion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: white; }
+        .navbar-admin { background: #0f0f0f; border-bottom: 1px solid #222; padding: 0.75rem 1.5rem; }
+        .navbar-brand { font-size: 1.8rem; font-weight: 800; }
+        .navbar-brand .indie { color: white; }
+        .navbar-brand .motion { color: #e50914; }
+        .offcanvas { background: linear-gradient(180deg, #0f0f0f 0%, #050505 100%); width: 280px; border-right: 1px solid #222; }
+        .nav-admin .nav-link { color: #b3b3b3; padding: 0.75rem 1rem; border-radius: 12px; transition: 0.2s; font-weight: 500; }
+        .nav-admin .nav-link i { width: 28px; margin-right: 8px; }
+        .nav-admin .nav-link:hover, .nav-admin .nav-link.active { background: #e50914; color: white; }
+        .admin-content { padding: 2rem; margin-top: 70px; }
+        .report-card { background: #141414; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid #2a2a2a; }
+        .btn-danger { background-color: #e50914; border: none; }
+        .btn-danger:hover { background-color: #f6121d; }
+        .btn-outline-danger { border-color: #e50914; color: #e50914; }
+        .btn-outline-danger:hover { background-color: #e50914; color: white; }
+        .table-dark-custom { background-color: #141414; }
+        .table-dark-custom th { border-bottom-color: #333; }
+        @media (max-width: 768px) { .admin-content { padding: 1rem; } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-admin fixed-top">
+        <div class="container-fluid">
+            <button class="btn btn-link text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar">
+                <i class="fas fa-bars fs-4"></i>
+            </button>
+            <a class="navbar-brand mx-auto" href="#"><span class="indie">Indie</span><span class="motion">Motion</span></a>
+            <div class="dropdown">
+                <button class="btn btn-link text-white dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle fs-4"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                    <li><span id="adminEmailDisplay" class="dropdown-item-text small text-white-50"></span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" id="adminLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="adminSidebar">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title text-white">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="nav nav-admin flex-column">
+                <li class="nav-item"><a class="nav-link" href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-movies.html"><i class="fas fa-film"></i> Movies</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-series.html"><i class="fas fa-tv"></i> Series</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-categories.html"><i class="fas fa-tags"></i> Categories</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-genres.html"><i class="fas fa-music"></i> Genres</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-users.html"><i class="fas fa-users"></i> Users</a></li>
+                <li class="nav-item"><a class="nav-link active" href="admin-reports.html"><i class="fas fa-chart-line"></i> Reports</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin-settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+            <hr class="bg-secondary my-4">
+            <button id="adminLogoutBtnSidebar" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+        </div>
+    </div>
+
+    <div class="admin-content">
+        <h2 class="mb-4">Analytics & Reports</h2>
+
+        <!-- Most Watched Movies -->
+        <div class="report-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4><i class="fas fa-fire text-danger me-2"></i>Most Watched Movies</h4>
+                <button class="btn btn-sm btn-outline-danger" onclick="exportCSV('movies')"><i class="fas fa-download me-1"></i>Export CSV</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-dark-custom">
+                    <thead>
+                        <tr><th>Title</th><th>Genre</th><th>Year</th><th>Views</th><th>Rating</th></tr>
+                    </thead>
+                    <tbody id="mostWatchedTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Top Rated Movies -->
+        <div class="report-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4><i class="fas fa-star text-warning me-2"></i>Top Rated Movies</h4>
+                <button class="btn btn-sm btn-outline-danger" onclick="exportCSV('top-rated')"><i class="fas fa-download me-1"></i>Export CSV</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-dark-custom">
+                    <thead><tr><th>Title</th><th>Genre</th><th>Year</th><th>Rating</th><th>Views</th></tr></thead>
+                    <tbody id="topRatedTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- User Activity Summary -->
+        <div class="report-card">
+            <h4><i class="fas fa-chart-simple me-2 text-danger"></i>User Activity</h4>
+            <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                    <div class="bg-dark p-3 rounded text-center">
+                        <div class="text-white-50">Total Watch History Entries</div>
+                        <div class="fs-2 fw-bold" id="totalWatchHistory">-</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-dark p-3 rounded text-center">
+                        <div class="text-white-50">Total Watchlist Items</div>
+                        <div class="fs-2 fw-bold" id="totalWatchlist">-</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-dark p-3 rounded text-center">
+                        <div class="text-white-50">Total Ratings Given</div>
+                        <div class="fs-2 fw-bold" id="totalRatings">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SB_URL = 'https://lxqxdtsgwgdogmncgaqj.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4cXhkdHNnd2dkb2dtbmNnYXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODkyMTgsImV4cCI6MjA5Njc2NTIxOH0.pkJOOXG9NkVqsRloO3lm1dRWXcrQESBlEiXW8g_Oh-8';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        let currentAdmin = null;
+        let moviesData = [];
+
+        async function checkAdmin() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = '/admin-login.html'; return false; }
+            const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', session.user.id).single();
+            if (!profile || profile.role !== 'admin') { await supabaseClient.auth.signOut(); window.location.href = '/admin-login.html'; return false; }
+            currentAdmin = session.user;
+            document.getElementById('adminEmailDisplay').innerText = currentAdmin.email;
+            return true;
+        }
+
+        async function loadReports() {
+            // Most watched movies (ordered by views desc)
+            const { data: watched } = await supabaseClient
+                .from('movies')
+                .select('id, title, views, rating, release_year, genres(name)')
+                .order('views', { ascending: false })
+                .limit(10);
+            const tbody1 = document.getElementById('mostWatchedTable');
+            if (watched && watched.length) {
+                tbody1.innerHTML = watched.map(m => `
+                    <tr><td>${m.title}</td><td>${m.genres?.name || '-'}</td><td>${m.release_year || '-'}</td><td>${m.views || 0}</td><td>${(m.rating || 0).toFixed(1)}</td></tr>
+                `).join('');
+            } else { tbody1.innerHTML = '<tr><td colspan="5">No data</td></tr>'; }
+
+            // Top rated movies (rating desc, min 1 rating)
+            const { data: topRated } = await supabaseClient
+                .from('movies')
+                .select('id, title, rating, views, release_year, genres(name)')
+                .order('rating', { ascending: false })
+                .limit(10);
+            const tbody2 = document.getElementById('topRatedTable');
+            if (topRated && topRated.length) {
+                tbody2.innerHTML = topRated.map(m => `
+                    <tr><td>${m.title}</td><td>${m.genres?.name || '-'}</td><td>${m.release_year || '-'}</td><td>${(m.rating || 0).toFixed(1)}</td><td>${m.views || 0}</td></tr>
+                `).join('');
+            } else { tbody2.innerHTML = '<tr><td colspan="5">No data</td></tr>'; }
+
+            // User activity stats
+            const { count: historyCount } = await supabaseClient.from('watch_history').select('*', { count: 'exact', head: true });
+            const { count: watchlistCount } = await supabaseClient.from('watchlist').select('*', { count: 'exact', head: true });
+            const { count: ratingsCount } = await supabaseClient.from('ratings').select('*', { count: 'exact', head: true });
+            document.getElementById('totalWatchHistory').innerText = historyCount || 0;
+            document.getElementById('totalWatchlist').innerText = watchlistCount || 0;
+            document.getElementById('totalRatings').innerText = ratingsCount || 0;
+
+            moviesData = watched || [];
+        }
+
+        function exportCSV(type) {
+            let data = [];
+            let filename = '';
+            if (type === 'movies') {
+                data = moviesData.map(m => ({ Title: m.title, Genre: m.genres?.name || '', Year: m.release_year || '', Views: m.views || 0, Rating: (m.rating || 0).toFixed(1) }));
+                filename = 'most_watched_movies.csv';
+            } else if (type === 'top-rated') {
+                data = (moviesData || []).map(m => ({ Title: m.title, Genre: m.genres?.name || '', Year: m.release_year || '', Rating: (m.rating || 0).toFixed(1), Views: m.views || 0 }));
+                filename = 'top_rated_movies.csv';
+            }
+            if (!data.length) return alert('No data to export');
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(obj => Object.values(obj).join(','));
+            const csv = [headers, ...rows].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function setupLogout() {
+            const fn = async () => { await supabaseClient.auth.signOut(); window.location.href = '/admin-login.html'; };
+            document.getElementById('adminLogoutBtn')?.addEventListener('click', fn);
+            document.getElementById('adminLogoutBtnSidebar')?.addEventListener('click', fn);
+        }
+
+        (async () => {
+            if (await checkAdmin()) {
+                await loadReports();
+                setupLogout();
+            }
+        })();
+    </script>
+</body>
+</html>
